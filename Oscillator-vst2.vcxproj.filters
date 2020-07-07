@@ -5,6 +5,8 @@
     <ClCompile Include="..\..\WDL\IPlug\IPlugVST.cpp">
       <Filter>vst2</Filter>
     </ClCompile>
+    <ClCompile Include="OscillatorGenerator.cpp" />
+    <ClCompile Include="dLinTerp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Oscillator.h" />
@@ -12,6 +14,8 @@
     <ClInclude Include="..\..\WDL\IPlug\IPlugVST.h">
       <Filter>vst2</Filter>
     </ClInclude>
+    <ClInclude Include="OscillatorGenerator.h" />
+    <ClInclude Include="dLinTerp.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Oscillator.rc" />

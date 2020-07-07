@@ -237,12 +237,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\WDL\IPlug\IPlugVST.h" />
+    <ClInclude Include="dLinTerp.h" />
     <ClInclude Include="Oscillator.h" />
+    <ClInclude Include="OscillatorGenerator.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\WDL\IPlug\IPlugVST.cpp" />
+    <ClCompile Include="dLinTerp.cpp" />
     <ClCompile Include="Oscillator.cpp" />
+    <ClCompile Include="OscillatorGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Oscillator.rc" />

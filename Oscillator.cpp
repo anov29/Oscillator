@@ -6,18 +6,16 @@
 
 const int kNumPrograms = 1;
 
-enum EParams
-{
+enum EParams {
   FrequencyFaderParam,
   WaveformParam,
   ModeParam,
-  kIRadioButtonsControl_V_P,
+  PolarityParam,
   OnOffParam,
   kNumParams
 };
 
-enum ELayout
-{
+enum ELayout {
   kWidth = GUI_WIDTH,
   kHeight = GUI_HEIGHT,
 
@@ -52,8 +50,7 @@ enum ELayout
 };
 
 Oscillator::Oscillator(IPlugInstanceInfo instanceInfo)
-  :	IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo)
-{
+  :	IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo) {
   TRACE;
 
   createGraphics(); 
@@ -101,14 +98,13 @@ void Oscillator::createGraphics() {
 	bitmap = pGraphics->LoadIBitmap(IRADIOBUTTONSCONTROL_ID, IRADIOBUTTONSCONTROL_FN, kIRadioButtonsControl_N);
 	pGraphics->AttachControl(new IRadioButtonsControl(this, IRECT(kIRadioButtonsControl_V_X_WF, kIRadioButtonsControl_V_Y_WF, kIRadioButtonsControl_V_X_WF + (kIRBC_W*kIRBC_VN), kIRadioButtonsControl_V_Y_WF + (kIRBC_H*kIRBC_VN)), WaveformParam, kIRBC_VN, &bitmap));
 	pGraphics->AttachControl(new IRadioButtonsControl(this, IRECT(kIRadioButtonsControl_V_X_M, kIRadioButtonsControl_V_Y_WF, kIRadioButtonsControl_V_X_M + (kIRBC_W*kIRBC_VN_M), kIRadioButtonsControl_V_Y_WF + (kIRBC_H*kIRBC_VN_M)), ModeParam, kIRBC_VN_M, &bitmap));
-	pGraphics->AttachControl(new IRadioButtonsControl(this, IRECT(kIRadioButtonsControl_V_X_P, kIRadioButtonsControl_V_Y_WF, kIRadioButtonsControl_V_X_P + (kIRBC_W*kIRBC_VN_P), kIRadioButtonsControl_V_Y_WF + (kIRBC_H*kIRBC_VN_P)), kIRadioButtonsControl_V_P, kIRBC_VN_M, &bitmap));
+	pGraphics->AttachControl(new IRadioButtonsControl(this, IRECT(kIRadioButtonsControl_V_X_P, kIRadioButtonsControl_V_Y_WF, kIRadioButtonsControl_V_X_P + (kIRBC_W*kIRBC_VN_P), kIRadioButtonsControl_V_Y_WF + (kIRBC_H*kIRBC_VN_P)), PolarityParam, kIRBC_VN_M, &bitmap));
 
 	AttachGraphics(pGraphics);
 }
 
 
-void Oscillator::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames)
-{
+void Oscillator::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames) {
   // Mutex is already locked for us.
 
   double* in1 = inputs[0];
@@ -116,27 +112,24 @@ void Oscillator::ProcessDoubleReplacing(double** inputs, double** outputs, int n
   double* out1 = outputs[0];
   double* out2 = outputs[1];
 
-  for (int s = 0; s < nFrames; ++s, ++in1, ++in2, ++out1, ++out2)
-  {
+  for (int s = 0; s < nFrames; ++s, ++in1, ++in2, ++out1, ++out2) {
 	  if (!m_bNoteon) {
 		  *out1 = 0;
 		  *out2 = 0;
 	  } else {
-		  *out1 = generator.generate(); 
-		  *out2 = *out1; // mono out 
+		  generator.generate(out1, out2); 
+		  // *out2 = *out1; // mono out, no quad phase 
 	  }
   }
 }
 
-void Oscillator::Reset()
-{
+void Oscillator::Reset() {
   TRACE;
   IMutexLock lock(this);
   generator.reset();
 }
 
-void Oscillator::OnParamChange(int paramIdx)
-{
+void Oscillator::OnParamChange(int paramIdx) {
   IMutexLock lock(this);
   switch (paramIdx)
   {
@@ -162,9 +155,12 @@ void Oscillator::OnParamChange(int paramIdx)
 	  generator.setMode((OscillatorGenerator::Mode)m);
 	  break;
   }
-	case kIRadioButtonsControl_V_P:
-		break;
-    default:
+  case PolarityParam: {
+	  int p = GetParam(paramIdx)->Value();
+	  generator.setPolarity((OscillatorGenerator::Polarity)p);
+	  break;
+  }
+  default:
       break;
   }
 }

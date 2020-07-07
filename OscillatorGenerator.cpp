@@ -39,7 +39,7 @@ OscillatorGenerator::OscillatorGenerator()
 		m_SinArray[i] = sin(((float)i / 1024.0)*(2 * PI));
 
 		// saw
-		m_Sawtootharray[i] = i < 512 ? ms1*i + bs1 : ms2*(i - 511) + bs2;
+		m_SawtoothArray[i] = i < 512 ? ms1*i + bs1 : ms2*(i - 511) + bs2;
 
 		// triangle
 		if (i < 256) {
@@ -122,37 +122,81 @@ OscillatorGenerator::~OscillatorGenerator()
 {
 }
 
-double OscillatorGenerator::generate() {
+void OscillatorGenerator::generate(double* pYn, double* pYqn) {
 	float fOutSample = 0; // output value for this cycle
+	float fQuadPhaseOutSample = 0; 
+
 	int nReadIndex = (int)m_fReadIndex;
+	int nQuadPhaseReadIndex = (int)m_fQuadPhaseReadIndex;
+
 	float fFrac = m_fReadIndex - nReadIndex;
+
 	int nReadIndexNext = nReadIndex + 1 > 1023 ? 0 : nReadIndex + 1; // read index of second index, wrap around buffer if needed
+	int nQuadPhaseReadIndexNext = nQuadPhaseReadIndex + 1 > 1023 ? 0 : nQuadPhaseReadIndex + 1; 
 
 	switch (selectedWaveform) {
 	case sine:
 		fOutSample = dLinInterp::dLinTerp(0, 1, m_SinArray[nReadIndex], m_SinArray[nReadIndexNext], fFrac); // interpolate frac value 
+		fQuadPhaseOutSample = dLinInterp::dLinTerp(0, 1, m_SinArray[nQuadPhaseReadIndex], m_SinArray[nQuadPhaseReadIndexNext], fFrac); 
 		break;
 	case saw:
-		fOutSample = dLinInterp::dLinTerp(0, 1, m_Sawtootharray[nReadIndex], m_Sawtootharray[nReadIndexNext], fFrac);
+		if (selectedMode == normal) {
+			fOutSample = dLinInterp::dLinTerp(0, 1, m_SawtoothArray[nReadIndex], m_SawtoothArray[nReadIndexNext], fFrac);
+			fQuadPhaseOutSample = dLinInterp::dLinTerp(0, 1, m_SawtoothArray[nQuadPhaseReadIndex], m_SawtoothArray[nQuadPhaseReadIndexNext], fFrac);
+		}
+		else {
+			fOutSample = dLinInterp::dLinTerp(0, 1, m_SawtoothArray_BL5[nReadIndex], m_SawtoothArray_BL5[nReadIndexNext], fFrac);
+			fQuadPhaseOutSample = dLinInterp::dLinTerp(0, 1, m_SawtoothArray_BL5[nQuadPhaseReadIndex], m_SawtoothArray_BL5[nQuadPhaseReadIndexNext], fFrac);
+		}
 		break;
 	case tri:
-		fOutSample = dLinInterp::dLinTerp(0, 1, m_TriangleArray[nReadIndex], m_TriangleArray[nReadIndexNext], fFrac);
+		if (selectedMode == normal) {
+			fOutSample = dLinInterp::dLinTerp(0, 1, m_TriangleArray[nReadIndex], m_TriangleArray[nReadIndexNext], fFrac);
+			fQuadPhaseOutSample = dLinInterp::dLinTerp(0, 1, m_TriangleArray[nQuadPhaseReadIndex], m_TriangleArray[nQuadPhaseReadIndexNext], fFrac);
+		}
+		else {
+			fOutSample = dLinInterp::dLinTerp(0, 1, m_TriangleArray_BL5[nReadIndex], m_TriangleArray_BL5[nReadIndexNext], fFrac);
+			fQuadPhaseOutSample = dLinInterp::dLinTerp(0, 1, m_TriangleArray_BL5[nQuadPhaseReadIndex], m_TriangleArray_BL5[nQuadPhaseReadIndexNext], fFrac);
+		}
 		break;
 	case square:
-		fOutSample = dLinInterp::dLinTerp(0, 1, m_SquareArray[nReadIndex], m_SquareArray[nReadIndexNext], fFrac);
+		if (selectedMode == normal) {
+			fOutSample = dLinInterp::dLinTerp(0, 1, m_SquareArray[nReadIndex], m_SquareArray[nReadIndexNext], fFrac);
+			fQuadPhaseOutSample = dLinInterp::dLinTerp(0, 1, m_SquareArray[nQuadPhaseReadIndex], m_SquareArray[nQuadPhaseReadIndexNext], fFrac);
+		}
+		else {
+			fOutSample = dLinInterp::dLinTerp(0, 1, m_SquareArray_BL5[nReadIndex], m_SquareArray_BL5[nReadIndexNext], fFrac);
+			fQuadPhaseOutSample = dLinInterp::dLinTerp(0, 1, m_SquareArray_BL5[nQuadPhaseReadIndex], m_SquareArray_BL5[nQuadPhaseReadIndexNext], fFrac);
+		}
 		break;
 	default:
 		fOutSample = dLinInterp::dLinTerp(0, 1, m_SinArray[nReadIndex], m_SinArray[nReadIndexNext], fFrac);
+		fQuadPhaseOutSample = dLinInterp::dLinTerp(0, 1, m_SinArray[nQuadPhaseReadIndex], m_SinArray[nQuadPhaseReadIndexNext], fFrac);
 		break;
 	}
 
 
 	m_fReadIndex += m_f_inc; // add increment for next time 
+	m_fQuadPhaseReadIndex += m_f_inc;
 
 	if (m_fReadIndex > 1024) {
 		m_fReadIndex = m_fReadIndex - 1024;
 	}
-	return fOutSample;
+	if (m_fQuadPhaseReadIndex > 1024) {
+		m_fQuadPhaseReadIndex = m_fQuadPhaseReadIndex - 1024;
+	}
+	// write out 
+	*pYn = fOutSample;
+	*pYqn = fQuadPhaseOutSample; 
+
+	// create unipolar; div 2 then shift up 0.5 
+	if (selectedPolarity == unipolar) {
+		*pYn /= 2.0;
+		*pYn += 0.5;
+
+		*pYqn /= 2.0;
+		*pYqn += 0.5; 
+	}
 }
 
 
@@ -177,7 +221,12 @@ void OscillatorGenerator::setWaveform(Waveform wf) {
 	selectedWaveform = wf;  
 }
 
+void OscillatorGenerator::setPolarity(Polarity p) {
+	selectedPolarity = p; 
+}
+
 void OscillatorGenerator::reset() {
 	m_fReadIndex = 0;
+	m_fQuadPhaseReadIndex = 0; 
 	cookFrequency();
 }
