@@ -11,6 +11,7 @@ public:
   ~Oscillator();
 
   OscillatorGenerator generator;
+  OscillatorGenerator detuneGenerator;
 
   void Reset();
   void OnParamChange(int paramIdx);
@@ -19,6 +20,8 @@ public:
 
 private:
   bool m_bNoteon; // on/off message 
+  float gain = .5; 
+  float detune = 0.0; 
 };
 
 #endif

@@ -10,6 +10,7 @@ public:
 	enum Polarity { bipolar, unipolar };
 
 	void setFrequency(float frequency);
+	float getFrequency(); 
 	void setWaveform(Waveform wf);
 	void setMode(Mode m);
 	void setPolarity(Polarity p); 

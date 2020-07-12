@@ -57,14 +57,16 @@ instrument determined by PLUG _IS _INST
 #define PLUG_DOES_STATE_CHUNKS 0
 
 // Unique IDs for each image resource.
+#define BG_ID					100
 #define ISWITCHCONTROL_2_ID     101
 #define IRADIOBUTTONSCONTROL_ID 103
 #define IFADERCONTROL_VERT_ID   106
 
 // Image resource locations for this plug.
+#define BG_FN					  "resources/img/background.png"
 #define ISWITCHCONTROL_2_FN       "resources/img/onoff.png"
 #define IRADIOBUTTONSCONTROL_FN   "resources/img/button.png"
-#define IFADERCONTROL_VERT_FN     "resources/img/IFaderControl_Vert.png"
+#define IFADERCONTROL_VERT_FN     "resources/img/fader.png"
 
 // GUI default dimensions
 #define GUI_WIDTH 500

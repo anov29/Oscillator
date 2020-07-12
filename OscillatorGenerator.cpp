@@ -217,6 +217,10 @@ void OscillatorGenerator::setFrequency(float frequency) {
 	cookFrequency();
 }
 
+float OscillatorGenerator::getFrequency() {
+	return m_fFrequency_Hz; 
+}
+
 void OscillatorGenerator::setWaveform(Waveform wf) {
 	selectedWaveform = wf;  
 }
