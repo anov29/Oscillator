@@ -18,6 +18,7 @@
 build-*
 ipch/*
 gui/*
+*.opendb
 
 Icon?
 .DS_Stor*
