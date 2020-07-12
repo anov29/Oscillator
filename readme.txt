@@ -1,0 +1,1 @@
+Exercise from Will Pirkle's book 'Designing Audio Effect Plugin-Ins in C++'. Includes detune and gain fader controls. Written in IPlug Framework.
