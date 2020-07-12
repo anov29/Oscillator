@@ -103,10 +103,10 @@ void Oscillator::createGraphics() {
 	pGraphics->AttachControl(captionControlGain);
 
 	// detune 
-	GetParam(DetuneFaderParam)->InitDouble("IFaderControl Detune", 0, 0, 30, .1, "Hz");
+	GetParam(DetuneFaderParam)->InitDouble("IFaderControl Detune", 0, 0, 500, .1, "Hz");
 	pGraphics->AttachControl(new IFaderControl(this, kIFaderDetune_Vert_X, kIFaderDetune_Vert_Y, kIFaderDetune_L, DetuneFaderParam, &bitmap));
 	ICaptionControl *captionControlDetune = new ICaptionControl(this, IRECT(kICC_Detune_X, kICC_Detune_Y, (kICC_Detune_X + kICC_W), (kICC_Detune_Y + kICC_H)), DetuneFaderParam, &text);
-	captionControlGain->DisablePrompt(false);
+	captionControlDetune->DisablePrompt(false);
 	pGraphics->AttachControl(captionControlDetune);
 
 	//text.mStyle = text.kStyleBold;
@@ -178,7 +178,7 @@ void Oscillator::OnParamChange(int paramIdx) {
 		  GetGUI()->SetParameterFromPlug(FrequencyFaderParam, GetParam(paramIdx)->Value(), false);
 	  }
 	  generator.setFrequency(GetParam(paramIdx)->Value());
-	  detuneGenerator.setFrequency(GetParam(paramIdx)->Value() - detune);
+	  detuneGenerator.setFrequency(GetParam(paramIdx)->Value() + detune);
 	  break;
   case GainFaderParam:
 	  gain = GetParam(paramIdx)->Value();
@@ -191,7 +191,7 @@ void Oscillator::OnParamChange(int paramIdx) {
 		  GetGUI()->SetParameterFromPlug(DetuneFaderParam, GetParam(paramIdx)->Value(), false);
 	  }
 	  detune = GetParam(paramIdx)->Value();
-	  detuneGenerator.setFrequency(generator.getFrequency() - detune);
+	  detuneGenerator.setFrequency(generator.getFrequency() + detune);
 	  break; 
   case OnOffParam:
 	  m_bNoteon = GetParam(paramIdx)->Value();
